@@ -13,6 +13,8 @@
 		E15308541BC4D9A2004F491A /* MyVirtualTourist.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = E15308521BC4D9A2004F491A /* MyVirtualTourist.xcdatamodeld */; };
 		E15308561BC4D9A2004F491A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E15308551BC4D9A2004F491A /* Assets.xcassets */; };
 		E15308591BC4D9A2004F491A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E15308571BC4D9A2004F491A /* LaunchScreen.storyboard */; };
+		E15308631BC4DAC1004F491A /* CoreDataStackManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15308621BC4DAC1004F491A /* CoreDataStackManager.swift */; settings = {ASSET_TAGS = (); }; };
+		E15308651BC4DED0004F491A /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E15308641BC4DED0004F491A /* MapKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -24,6 +26,8 @@
 		E15308551BC4D9A2004F491A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E15308581BC4D9A2004F491A /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		E153085A1BC4D9A2004F491A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E15308621BC4DAC1004F491A /* CoreDataStackManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataStackManager.swift; sourceTree = "<group>"; };
+		E15308641BC4DED0004F491A /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -31,6 +35,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E15308651BC4DED0004F491A /* MapKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -40,6 +45,7 @@
 		E153083F1BC4D9A2004F491A = {
 			isa = PBXGroup;
 			children = (
+				E15308641BC4DED0004F491A /* MapKit.framework */,
 				E153084A1BC4D9A2004F491A /* MyVirtualTourist */,
 				E15308491BC4D9A2004F491A /* Products */,
 			);
@@ -57,14 +63,39 @@
 			isa = PBXGroup;
 			children = (
 				E153084B1BC4D9A2004F491A /* AppDelegate.swift */,
-				E153084D1BC4D9A2004F491A /* ViewController.swift */,
-				E153084F1BC4D9A2004F491A /* Main.storyboard */,
-				E15308551BC4D9A2004F491A /* Assets.xcassets */,
-				E15308571BC4D9A2004F491A /* LaunchScreen.storyboard */,
+				E15308681BC4E2C9004F491A /* Models */,
+				E15308671BC4E2C3004F491A /* Views */,
+				E15308661BC4E2BB004F491A /* Controllers */,
 				E153085A1BC4D9A2004F491A /* Info.plist */,
-				E15308521BC4D9A2004F491A /* MyVirtualTourist.xcdatamodeld */,
 			);
 			path = MyVirtualTourist;
+			sourceTree = "<group>";
+		};
+		E15308661BC4E2BB004F491A /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				E153084D1BC4D9A2004F491A /* ViewController.swift */,
+			);
+			name = Controllers;
+			sourceTree = "<group>";
+		};
+		E15308671BC4E2C3004F491A /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				E15308571BC4D9A2004F491A /* LaunchScreen.storyboard */,
+				E153084F1BC4D9A2004F491A /* Main.storyboard */,
+				E15308551BC4D9A2004F491A /* Assets.xcassets */,
+			);
+			name = Views;
+			sourceTree = "<group>";
+		};
+		E15308681BC4E2C9004F491A /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				E15308621BC4DAC1004F491A /* CoreDataStackManager.swift */,
+				E15308521BC4D9A2004F491A /* MyVirtualTourist.xcdatamodeld */,
+			);
+			name = Models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -138,6 +169,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E153084E1BC4D9A2004F491A /* ViewController.swift in Sources */,
+				E15308631BC4DAC1004F491A /* CoreDataStackManager.swift in Sources */,
 				E153084C1BC4D9A2004F491A /* AppDelegate.swift in Sources */,
 				E15308541BC4D9A2004F491A /* MyVirtualTourist.xcdatamodeld in Sources */,
 			);

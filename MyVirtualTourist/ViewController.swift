@@ -10,31 +10,23 @@ import UIKit
 import MapKit
 import CoreData
 
-class ViewController: UIViewController, NSFetchedResultsControllerDelegate {
+class ViewController: UIViewController, NSFetchedResultsControllerDelegate, MKMapViewDelegate {
 
     @IBOutlet weak var touristMap: MKMapView!
 
-    var mapRegion = MKCoordinateRegion()
-    
-    var regionFilePath : String {
-        let manager = NSFileManager.defaultManager()
-        let url = manager.URLsForDirectory(.DocumentDirectory, inDomains: .UserDomainMask).first as NSURL!
-        return url.URLByAppendingPathComponent("mapRegion").path!
-    }
+    var mapRegion: MapRegion?
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        touristMap.delegate = self
 
         let longPressRecogniser = UILongPressGestureRecognizer(target: self, action: "createPin:")
         
         longPressRecogniser.minimumPressDuration = 1.0
         touristMap.addGestureRecognizer(longPressRecogniser)
         
-        fetchMapRegion()
-    }
-    
-    override func viewWillDisappear(animated: Bool) {
-        saveMapRegion()
+        setMapRegion()
     }
     
     // MARK: - Shared Context
@@ -43,38 +35,79 @@ class ViewController: UIViewController, NSFetchedResultsControllerDelegate {
         CoreDataStackManager.sharedInstance().managedObjectContext
     }()
     
-    func fetchRegion() {
+    // MARK: MapRegion functions
+    
+    func setMapRegion() {
+        
+        // Get persisted MapRegion instance from Core data (if any exists) and save it to both the view controller's private mapRegion property, and the mapView's region.
+        let regions = fetchMapRegions()
+        if regions.count > 0 {
+            // Use the persisted value for the region.
+            
+            // set the view controller's mapRegion property
+            self.mapRegion = regions[0]
+            
+            // Set the mapView's region.
+            self.touristMap.region = regions[0].region
+            
+            logMapViewRegion()
+        }
+    }
+    
+    /* Save this view controller's mapRegion to the context after updating it to the mapView's current region. */
+    func saveMapRegion() {
+        
+        if self.mapRegion != nil {
+            // Set the mapRegion property to the mapView's current region.
+            self.mapRegion!.latitude = self.touristMap.region.center.latitude
+            self.mapRegion!.longitude = self.touristMap.region.center.longitude
+            self.mapRegion!.latitudeDelta = self.touristMap.region.span.latitudeDelta
+            self.mapRegion!.longitudeDelta = self.touristMap.region.span.longitudeDelta
+            
+        } else {
+            // Create a map region instance initialized to the mapView's current region.
+            var dict = [String: AnyObject]()
+            dict[MapRegion.Keys.latitude] = self.touristMap.region.center.latitude
+            dict[MapRegion.Keys.longitude] = self.touristMap.region.center.longitude
+            dict[MapRegion.Keys.latitudeDelta] = self.touristMap.region.span.latitudeDelta
+            dict[MapRegion.Keys.longitudeDelta] = self.touristMap.region.span.longitudeDelta
+            self.mapRegion = MapRegion(dictionary: dict, context: sharedContext)
+        }
+        
+        CoreDataStackManager.sharedInstance().saveContext()
+        
+        let regions = fetchMapRegions()
+        print("Regions counter \(regions.count)")
+    }
+    
+    func logMapViewRegion() {
+        
+        let region = self.touristMap.region
+        print("map region: \(region.center.latitude, region.center.longitude, region.span.latitudeDelta, region.span.longitudeDelta)")
+    }
+    
+    func fetchMapRegions() -> [MapRegion] {
         var error: NSError?
-        var coordinateRegion: MKCoordinateRegion?
         
-        // Create the Fetch Request
         let fetchRequest = NSFetchRequest(entityName: "MapRegion")
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "latitude", ascending: false)]
         
-        // Execute the Fetch Request
         let results: [AnyObject]?
+        
         do {
             results = try sharedContext.executeFetchRequest(fetchRequest)
-            if let resultsValid = results {
-                if let mapRegion: MapRegion = (resultsValid[0] as! MapRegion) {
-                    let center = CLLocationCoordinate2D(latitude: mapRegion.latitude, longitude: mapRegion.longitude)
-                    let span = MKCoordinateSpan(latitudeDelta: mapRegion.latitudeDelta, longitudeDelta: mapRegion.longitudeDelta)
-                    coordinateRegion = MKCoordinateRegion(center: center, span: span)
-                }
-            }
-            
         } catch let error1 as NSError {
             error = error1
-            coordinateRegion = nil
+            results = nil
         }
         
         // Check for Errors
         if let error = error {
-            print("Error in fetchRegion(): \(error)")
+            print("Unresolved error \(error), \(error.userInfo)", terminator: "")
+            abort()
         }
         
-        if coordinateRegion != nil {
-            touristMap.setRegion(coordinateRegion!, animated: true)
-        }
+        return results as? [MapRegion] ?? [MapRegion]()
     }
     
     // MARK: - functions
@@ -90,18 +123,15 @@ class ViewController: UIViewController, NSFetchedResultsControllerDelegate {
         
         touristMap.addAnnotation(annotation)
     }
+    
+    func mapView(mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
+        print("Changes: \(mapView.region.center.latitude, mapView.region.center.longitude, mapView.region.center.longitude)")
+        saveMapRegion()
+    }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
-    }
-    
-    func saveMapRegion() {
-//        touristMap.region
-    }
-    
-    func fetchMapRegion() {
-        
     }
 }
 

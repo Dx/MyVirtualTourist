@@ -1,20 +1,10 @@
 //
 //  CoreDataStackManager.swift
-//  FavoriteActors
-//
-//  Created by Jason on 3/10/15.
-//  Copyright (c) 2015 Udacity. All rights reserved.
+//  MyVirtualTourist
 //
 
 import Foundation
 import CoreData
-
-/**
- * The CoreDataStackManager contains the code that was previously living in the 
- * AppDelegate in Lesson 3. Apple puts the code in the AppDelegate in many of their
- * Xcode templates. But they put it in a convenience class like this in sample code
- * like the "Earthquakes" project.
- */
 
 private let SQLITE_FILE_NAME = "MyVirtualTourist.sqlite"
 
@@ -22,10 +12,6 @@ class CoreDataStackManager {
     
     
     // MARK: - Shared Instance    
-    /**
-     *  This class variable provides an easy way to get access
-     *  to a shared instance of the CoreDataStackManager class.
-     */
     class func sharedInstance() -> CoreDataStackManager {
         struct Static {
             static let instance = CoreDataStackManager()
@@ -33,8 +19,6 @@ class CoreDataStackManager {
     
         return Static.instance
     }
-    
-    // MARK: - The Core Data stack. The code has been moved, unaltered, from the AppDelegate.
     
     lazy var applicationDocumentsDirectory: NSURL = {
         // The directory the application uses to store the Core Data store file. This code uses a directory named "com.palmera.MyVirtualTourist" in the application's documents Application Support directory.
@@ -92,6 +76,7 @@ class CoreDataStackManager {
                 // abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
                 let nserror = error as NSError
                 NSLog("Unresolved error \(nserror), \(nserror.userInfo)")
+                print("Unresolved error \(nserror), \(nserror.userInfo)")
                 abort()
             }
         }

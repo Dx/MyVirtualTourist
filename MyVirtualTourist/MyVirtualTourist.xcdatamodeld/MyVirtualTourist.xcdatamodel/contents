@@ -13,8 +13,8 @@
         <relationship name="pictures" optional="YES" toMany="YES" deletionRule="Nullify" ordered="YES" destinationEntity="Picture" inverseName="pin" inverseEntity="Picture" syncable="YES"/>
     </entity>
     <elements>
-        <element name="Pin" positionX="-63" positionY="-18" width="128" height="60"/>
-        <element name="Picture" positionX="-54" positionY="-9" width="128" height="60"/>
         <element name="MapRegion" positionX="-45" positionY="18" width="128" height="105"/>
+        <element name="Picture" positionX="-54" positionY="-9" width="128" height="60"/>
+        <element name="Pin" positionX="-63" positionY="-18" width="128" height="60"/>
     </elements>
 </model>

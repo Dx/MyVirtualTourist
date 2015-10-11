@@ -49,8 +49,6 @@ class ViewController: UIViewController, NSFetchedResultsControllerDelegate, MKMa
             
             // Set the mapView's region.
             self.touristMap.region = regions[0].region
-            
-            logMapViewRegion()
         }
     }
     
@@ -80,12 +78,6 @@ class ViewController: UIViewController, NSFetchedResultsControllerDelegate, MKMa
         print("Regions counter \(regions.count)")
     }
     
-    func logMapViewRegion() {
-        
-        let region = self.touristMap.region
-        print("map region: \(region.center.latitude, region.center.longitude, region.span.latitudeDelta, region.span.longitudeDelta)")
-    }
-    
     func fetchMapRegions() -> [MapRegion] {
         var error: NSError?
         
@@ -110,7 +102,7 @@ class ViewController: UIViewController, NSFetchedResultsControllerDelegate, MKMa
         return results as? [MapRegion] ?? [MapRegion]()
     }
     
-    // MARK: - functions
+    // MARK: - map functions
     
     func createPin(gestureRecognizer : UIGestureRecognizer){
         if gestureRecognizer.state != .Began { return }

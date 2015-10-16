@@ -12,8 +12,6 @@ import CoreData
 import MapKit
 import CoreLocation
 
-@objc(MapRegion)
-
 class MapRegion: NSManagedObject {
     
     @NSManaged var latitude: NSNumber

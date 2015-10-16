@@ -16,6 +16,8 @@
 		E15308631BC4DAC1004F491A /* CoreDataStackManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15308621BC4DAC1004F491A /* CoreDataStackManager.swift */; settings = {ASSET_TAGS = (); }; };
 		E15308651BC4DED0004F491A /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E15308641BC4DED0004F491A /* MapKit.framework */; };
 		E153086B1BC5BCD9004F491A /* MapRegion.swift in Sources */ = {isa = PBXBuildFile; fileRef = E153086A1BC5BCD9004F491A /* MapRegion.swift */; settings = {ASSET_TAGS = (); }; };
+		E15DF25B1BCCB52100191471 /* Pin.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15DF25A1BCCB52100191471 /* Pin.swift */; settings = {ASSET_TAGS = (); }; };
+		E15DF25D1BCCB69200191471 /* Picture.swift in Sources */ = {isa = PBXBuildFile; fileRef = E15DF25C1BCCB69200191471 /* Picture.swift */; settings = {ASSET_TAGS = (); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +32,8 @@
 		E15308621BC4DAC1004F491A /* CoreDataStackManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataStackManager.swift; sourceTree = "<group>"; };
 		E15308641BC4DED0004F491A /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
 		E153086A1BC5BCD9004F491A /* MapRegion.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MapRegion.swift; sourceTree = "<group>"; };
+		E15DF25A1BCCB52100191471 /* Pin.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Pin.swift; sourceTree = "<group>"; };
+		E15DF25C1BCCB69200191471 /* Picture.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Picture.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,6 +109,8 @@
 			isa = PBXGroup;
 			children = (
 				E153086A1BC5BCD9004F491A /* MapRegion.swift */,
+				E15DF25A1BCCB52100191471 /* Pin.swift */,
+				E15DF25C1BCCB69200191471 /* Picture.swift */,
 			);
 			name = Entities;
 			sourceTree = "<group>";
@@ -183,6 +189,8 @@
 				E153084E1BC4D9A2004F491A /* ViewController.swift in Sources */,
 				E15308631BC4DAC1004F491A /* CoreDataStackManager.swift in Sources */,
 				E153086B1BC5BCD9004F491A /* MapRegion.swift in Sources */,
+				E15DF25B1BCCB52100191471 /* Pin.swift in Sources */,
+				E15DF25D1BCCB69200191471 /* Picture.swift in Sources */,
 				E153084C1BC4D9A2004F491A /* AppDelegate.swift in Sources */,
 				E15308541BC4D9A2004F491A /* MyVirtualTourist.xcdatamodeld in Sources */,
 			);

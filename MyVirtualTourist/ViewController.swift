@@ -16,6 +16,8 @@ class ViewController: UIViewController, NSFetchedResultsControllerDelegate, MKMa
 
     var mapRegion: MapRegion?
     
+    var isInitialLoad = true
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -27,6 +29,8 @@ class ViewController: UIViewController, NSFetchedResultsControllerDelegate, MKMa
         touristMap.addGestureRecognizer(longPressRecogniser)
         
         setMapRegion()
+        
+        isInitialLoad = false
     }
     
     // MARK: - Shared Context
@@ -54,6 +58,8 @@ class ViewController: UIViewController, NSFetchedResultsControllerDelegate, MKMa
     
     /* Save this view controller's mapRegion to the context after updating it to the mapView's current region. */
     func saveMapRegion() {
+        
+        if isInitialLoad { return }
         
         if self.mapRegion != nil {
             // Set the mapRegion property to the mapView's current region.

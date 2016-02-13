@@ -54,6 +54,43 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
         }
     }
     
+    func onNewCollectionButtonTap() {
+        if let pin = pin {
+            for photo in pin.pictures {
+                photo.deletePicture()
+            }
+            CoreDataStackManager.sharedInstance().saveContext()
+        }
+        
+        resetPictures()
+    }
+    
+    func resetPictures() {
+        
+        newCollectionButton!.enabled = false
+        
+        if let pin = self.pin {
+            self.flickr.searchPhotosBy2DCoordinates(pin) {
+                success, error, imageMetadata in
+                if success == true {
+                    Picture.initPhotosFrom(imageMetadata, forPin: pin)
+                    
+                    self.newCollectionButton!.enabled = true
+                    
+                    dispatch_async(dispatch_get_main_queue()) {
+                        self.collectionView.reloadData()
+                    }
+                } else {
+
+                    if let error = error {
+                        _ = error.localizedDescription
+                        print("error \(error.localizedDescription)")
+                    }
+                }
+            }
+        }
+    }
+    
     func showPinOnMap(pin: Pin) {
         var annotations = [MKPointAnnotation]()
         annotations.append(pin.annotation)

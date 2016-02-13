@@ -42,11 +42,12 @@ class ViewController: UIViewController, MKMapViewDelegate {
         self.navigationItem.rightBarButtonItem = editButton
 
         let longPressRecogniser = UILongPressGestureRecognizer(target: self, action: "longPress:")
-        
         longPressRecogniser.minimumPressDuration = 1.0
         mapView.addGestureRecognizer(longPressRecogniser)
         
         setMapRegion()
+        
+        setPinsOnMap()
         
         isInitialLoad = false
     }
@@ -176,6 +177,46 @@ class ViewController: UIViewController, MKMapViewDelegate {
             
                 mapView.removeAnnotation(annotation)
         }
+    }
+    
+    func setPinsOnMap() {
+        // clear all pins from the mapView
+        let annotations = mapView.annotations //add this if you want to leave the pin of the user's current location .filter { $0 !== mapView.userLocation }
+        mapView.removeAnnotations(annotations)
+        
+        // query the context for all pins
+        let pins = fetchAllPins()
+        
+        var annotationsToAdd = [MKAnnotation]()
+        for pin in pins {
+            annotationsToAdd.append(pin.annotation)
+            //showPinOnMap(pin)
+        }
+        
+        // add all the pins to the mapView
+        mapView.addAnnotations(annotationsToAdd)
+        
+        // draw the pins
+        dispatch_async(dispatch_get_main_queue()) {
+            self.mapView.setNeedsDisplay()
+        }
+    }
+    
+    func fetchAllPins() -> [Pin] {
+        let errorPointer: NSErrorPointer = nil
+        let fetchRequest = NSFetchRequest(entityName: "Pin")
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "latitude", ascending: false), NSSortDescriptor(key: "longitude", ascending: false)]
+        let results: [AnyObject]?
+        do {
+            results = try sharedContext.executeFetchRequest(fetchRequest)
+        } catch let error as NSError {
+            errorPointer.memory = error
+            results = nil
+        }
+        if errorPointer != nil {
+            print("Error in fetchAllPins(): \(errorPointer)")
+        }
+        return results as? [Pin] ?? [Pin]()
     }
     
     func deletePin(pin: Pin) {

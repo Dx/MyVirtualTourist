@@ -14,12 +14,14 @@ import CoreLocation
 class Pin: NSManagedObject {
     @NSManaged var latitude: NSNumber
     @NSManaged var longitude: NSNumber
-    @NSManaged var photos: [Picture]
+    @NSManaged var pictures: [Picture]
+    
+    @NSManaged var flickrPage: NSNumber
     
     struct Keys {
         static let latitude: String = "latitude"
         static let longitude: String = "longitude"
-        static let photos = "photos"
+        static let pictures = "pictures"
     }
     
     override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?) {
@@ -32,5 +34,25 @@ class Pin: NSManagedObject {
         
         latitude = dictionary[Keys.latitude] as! Double
         longitude = dictionary[Keys.longitude] as! Double
+    }
+    
+    var coordinate: CLLocationCoordinate2D {
+        get {
+            let coordinate = CLLocationCoordinate2D(latitude: latitude.doubleValue, longitude: longitude.doubleValue )
+            return coordinate
+        }
+        set {
+            latitude = newValue.latitude
+            longitude = newValue.longitude
+        }
+    }
+    
+    var annotation: MKPointAnnotation {
+        get {
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = coordinate
+            annotation.title = "select to view photos"
+            return annotation
+        }
     }
 }

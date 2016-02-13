@@ -10,34 +10,84 @@ import UIKit
 import MapKit
 import CoreData
 
-class ViewController: UIViewController, NSFetchedResultsControllerDelegate, MKMapViewDelegate {
+class ViewController: UIViewController, MKMapViewDelegate {
 
-    @IBOutlet weak var touristMap: MKMapView!
+    @IBOutlet weak var mapView: MKMapView!
+    @IBOutlet weak var mapContainerView: UIView!
+    @IBOutlet weak var hintContainerView: UIView!
 
     var mapRegion: MapRegion?
-    
+    var currentState: EditState = .AddPin
     var isInitialLoad = true
+    let flickr = FlickrClient()
+    
+    enum EditState {
+        case AddPin
+        case EditPins
+    }
+    
+    // MARK: - Shared Context
+    lazy var sharedContext: NSManagedObjectContext = {
+        CoreDataStackManager.sharedInstance().managedObjectContext
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        touristMap.delegate = self
+        mapView.delegate = self
+        
+        hintContainerView.hidden = true
+        
+        let editButton = UIBarButtonItem(barButtonSystemItem: .Edit, target: self, action: "onEditClick")
+        self.navigationItem.rightBarButtonItem = editButton
 
-        let longPressRecogniser = UILongPressGestureRecognizer(target: self, action: "createPin:")
+        let longPressRecogniser = UILongPressGestureRecognizer(target: self, action: "longPress:")
         
         longPressRecogniser.minimumPressDuration = 1.0
-        touristMap.addGestureRecognizer(longPressRecogniser)
+        mapView.addGestureRecognizer(longPressRecogniser)
         
         setMapRegion()
         
         isInitialLoad = false
     }
     
-    // MARK: - Shared Context
+    func onEditClick() {
+        hintContainerView.hidden = false
+        
+        self.hintContainerView.frame = CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y + self.view.frame.size.height, self.view.frame.size.width, 80)
+        
+        UIView.animateWithDuration(0.5, animations: {
+            self.mapContainerView.frame = CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y + 64.0 - 80, self.view.frame.size.width, self.view.frame.size.height)
+            
+            self.hintContainerView.frame = CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y + self.view.frame.size.height - 80, self.view.frame.size.width, 80)
+        })
+        
+        let doneButton = UIBarButtonItem(barButtonSystemItem: .Done, target: self, action: "onDoneClick")
+        self.navigationItem.rightBarButtonItem = doneButton
+        
+        currentState = .EditPins
+    }
     
-    lazy var sharedContext: NSManagedObjectContext = {
-        CoreDataStackManager.sharedInstance().managedObjectContext
-    }()
+    func onDoneClick() {
+        // Animate
+        UIView.animateWithDuration(0.5, animations: {
+
+            self.mapContainerView.frame = CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y + 64, self.view.frame.size.width, self.view.frame.size.height - 64)
+            
+            self.mapView.frame = CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y - 64, self.view.frame.size.width, self.view.frame.size.height)
+            
+            self.hintContainerView.frame = CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y + self.view.frame.size.height, self.view.frame.size.width, 80)
+            },
+            completion: {
+                (value: Bool) in
+                self.hintContainerView.hidden = true
+        })
+        
+        let editButton = UIBarButtonItem(barButtonSystemItem: .Edit, target: self, action: "onEditClick")
+        self.navigationItem.rightBarButtonItem = editButton
+        
+        currentState = .AddPin
+    }
     
     // MARK: MapRegion functions
     
@@ -52,29 +102,27 @@ class ViewController: UIViewController, NSFetchedResultsControllerDelegate, MKMa
             self.mapRegion = regions[0]
             
             // Set the mapView's region.
-            self.touristMap.region = regions[0].region
+            self.mapView.region = regions[0].region
         }
     }
     
-    /* Save this view controller's mapRegion to the context after updating it to the mapView's current region. */
     func saveMapRegion() {
         
         if isInitialLoad { return }
         
         if self.mapRegion != nil {
-            // Set the mapRegion property to the mapView's current region.
-            self.mapRegion!.latitude = self.touristMap.region.center.latitude
-            self.mapRegion!.longitude = self.touristMap.region.center.longitude
-            self.mapRegion!.latitudeDelta = self.touristMap.region.span.latitudeDelta
-            self.mapRegion!.longitudeDelta = self.touristMap.region.span.longitudeDelta
+
+            self.mapRegion!.latitude = self.mapView.region.center.latitude
+            self.mapRegion!.longitude = self.mapView.region.center.longitude
+            self.mapRegion!.latitudeDelta = self.mapView.region.span.latitudeDelta
+            self.mapRegion!.longitudeDelta = self.mapView.region.span.longitudeDelta
             
         } else {
-            // Create a map region instance initialized to the mapView's current region.
             var dict = [String: AnyObject]()
-            dict[MapRegion.Keys.latitude] = self.touristMap.region.center.latitude
-            dict[MapRegion.Keys.longitude] = self.touristMap.region.center.longitude
-            dict[MapRegion.Keys.latitudeDelta] = self.touristMap.region.span.latitudeDelta
-            dict[MapRegion.Keys.longitudeDelta] = self.touristMap.region.span.longitudeDelta
+            dict[MapRegion.Keys.latitude] = self.mapView.region.center.latitude
+            dict[MapRegion.Keys.longitude] = self.mapView.region.center.longitude
+            dict[MapRegion.Keys.latitudeDelta] = self.mapView.region.span.latitudeDelta
+            dict[MapRegion.Keys.longitudeDelta] = self.mapView.region.span.longitudeDelta
             self.mapRegion = MapRegion(dictionary: dict, context: sharedContext)
         }
         
@@ -99,7 +147,6 @@ class ViewController: UIViewController, NSFetchedResultsControllerDelegate, MKMa
             results = nil
         }
         
-        // Check for Errors
         if let error = error {
             print("Unresolved error \(error), \(error.userInfo)", terminator: "")
             abort()
@@ -108,18 +155,147 @@ class ViewController: UIViewController, NSFetchedResultsControllerDelegate, MKMa
         return results as? [MapRegion] ?? [MapRegion]()
     }
     
-    // MARK: - map functions
+    // MARK: - Pins
+    func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
+        
+        let annotation: MKAnnotation = view.annotation!
+        
+        let pin: Pin? = fetchPin(atCoordinate: annotation.coordinate)
+        
+        switch currentState {
+            case .AddPin:
+                let storyboard = UIStoryboard (name: "Main", bundle: nil)
+                let controller = storyboard.instantiateViewControllerWithIdentifier("PhotoAlbumControllerID") as! PhotoAlbumViewController
+                controller.pin = pin
+                self.navigationController?.pushViewController(controller, animated: true)
+            
+            case .EditPins:
+                if let pin = pin {
+                    deletePin(pin)
+                }
+            
+                mapView.removeAnnotation(annotation)
+        }
+    }
     
-    func createPin(gestureRecognizer : UIGestureRecognizer){
-        if gestureRecognizer.state != .Began { return }
+    func deletePin(pin: Pin) {
+        sharedContext.deleteObject(pin)
+        CoreDataStackManager.sharedInstance().saveContext()
+    }
+    
+    func fetchPins() -> [Pin] {
+        var error: NSError?
         
-        let touchPoint = gestureRecognizer.locationInView(self.touristMap)
-        let touchMapCoordinate = touristMap.convertPoint(touchPoint, toCoordinateFromView: touristMap)
+        let fetchRequest = NSFetchRequest(entityName: "Pin")
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "latitude", ascending: false)]
         
-        let annotation = MKPointAnnotation()
-        annotation.coordinate = touchMapCoordinate
+        let results: [AnyObject]?
         
-        touristMap.addAnnotation(annotation)
+        do {
+            results = try sharedContext.executeFetchRequest(fetchRequest)
+        } catch let error1 as NSError {
+            error = error1
+            results = nil
+        }
+        
+        // Check for Errors
+        if let error = error {
+            print("Unresolved error \(error), \(error.userInfo)", terminator: "")
+            abort()
+        }
+        
+        if let results = results {
+            return (results as? [Pin])! // ?? [Pin]()
+        } else {
+            return [Pin]()
+        }
+    }
+    
+    func fetchPin(atCoordinate coordinate: CLLocationCoordinate2D) -> Pin? {
+        // Create and execute the fetch request
+        let error: NSErrorPointer = nil
+        let fetchRequest = NSFetchRequest(entityName: "Pin")
+        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "latitude", ascending: false), NSSortDescriptor(key: "longitude", ascending: false)]
+        let predicateLat = NSPredicate(format: "latitude == %@", NSNumber(double: coordinate.latitude))
+        let predicateLon = NSPredicate(format: "longitude == %@", NSNumber(double: coordinate.longitude))
+        let predicate = NSCompoundPredicate(type: NSCompoundPredicateType.AndPredicateType, subpredicates: [predicateLat, predicateLon])
+        fetchRequest.predicate = predicate
+        let results: [AnyObject]?
+        do {
+            results = try sharedContext.executeFetchRequest(fetchRequest)
+        } catch let error1 as NSError {
+            error.memory = error1
+            results = nil
+        }
+        
+        if error != nil {
+            print("Error in fetchPin(): \(error)")
+        }
+        
+        if let result = results {
+            return (result[0] as? Pin)!
+        } else {
+            return nil
+        }
+    }
+    
+    // MARK: - Map functions
+    func longPress(gestureRecognizer : UIGestureRecognizer){
+        
+        switch currentState {
+        case .AddPin:
+            if gestureRecognizer.state != .Began { return }
+        
+            let touchPoint = gestureRecognizer.locationInView(self.mapView)
+            let touchMapCoordinate = mapView.convertPoint(touchPoint, toCoordinateFromView: self.mapView)
+        
+            let annotation = MKPointAnnotation()
+            annotation.coordinate = touchMapCoordinate
+            
+            let viewPoint: CGPoint = gestureRecognizer.locationInView(self.mapView)
+            
+            let pin = createPinAtPoint(viewPoint)
+            
+            self.flickr.searchPhotosBy2DCoordinates(pin) {
+                success, error, imageMetadata in
+                if success == true {
+                    Picture.initPhotosFrom(imageMetadata, forPin: pin)
+                }
+            }
+        case .EditPins:
+            return
+        }
+    }
+    
+    func createPinAtPoint(viewPoint: CGPoint) -> Pin {
+        
+        let mapPoint: CLLocationCoordinate2D = self.mapView.convertPoint(viewPoint, toCoordinateFromView: self.mapView)
+        
+        let pin: Pin = createPinAtCoordinate(latitude: mapPoint.latitude, longitude: mapPoint.longitude)
+        
+        showPinOnMap(pin)
+        
+        // Save pin
+        CoreDataStackManager.sharedInstance().saveContext()
+        
+        return pin
+    }
+    
+    func showPinOnMap(pin: Pin) {
+        
+        var annotations = [MKPointAnnotation]()
+        annotations.append(pin.annotation)
+        
+        self.mapView.addAnnotations(annotations)
+        self.mapView.setNeedsDisplay()
+    }
+    
+    func createPinAtCoordinate(latitude latitude: Double, longitude: Double) -> Pin {
+        var dict = [String: AnyObject]()
+        dict[Pin.Keys.latitude] = latitude
+        dict[Pin.Keys.longitude] = longitude
+        let pin = Pin(dictionary: dict, context: sharedContext)
+        return pin
     }
     
     func mapView(mapView: MKMapView, regionDidChangeAnimated animated: Bool) {
@@ -127,9 +303,9 @@ class ViewController: UIViewController, NSFetchedResultsControllerDelegate, MKMa
         saveMapRegion()
     }
 
+    // MARK: - Others
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
 }
 

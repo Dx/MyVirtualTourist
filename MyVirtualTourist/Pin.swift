@@ -14,14 +14,14 @@ import CoreLocation
 class Pin: NSManagedObject {
     @NSManaged var latitude: NSNumber
     @NSManaged var longitude: NSNumber
-    @NSManaged var pictures: [Picture]
+    @NSManaged var photos: [Photo]
     
     @NSManaged var flickrPage: NSNumber
     
     struct Keys {
         static let latitude: String = "latitude"
         static let longitude: String = "longitude"
-        static let pictures = "pictures"
+        static let photos = "photos"
     }
     
     override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?) {

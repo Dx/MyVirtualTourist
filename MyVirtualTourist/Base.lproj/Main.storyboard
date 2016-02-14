@@ -22,7 +22,7 @@
         <!--Virtual Tourist-->
         <scene sceneID="CJc-aJ-q4L">
             <objects>
-                <viewController title="Virtual Tourist" id="n6B-bI-WU3" customClass="ViewController" customModule="MyVirtualTourist" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="Virtual Tourist" id="n6B-bI-WU3" customClass="TravelLocationsMapViewController" customModule="MyVirtualTourist" customModuleProvider="target" sceneMemberID="viewController">
                     <layoutGuides>
                         <viewControllerLayoutGuide type="top" id="uGP-Ij-nse"/>
                         <viewControllerLayoutGuide type="bottom" id="HKf-YG-7AZ"/>
@@ -180,8 +180,8 @@
                                             <outlet property="delegate" destination="aD1-Tc-Ndw" id="Ja9-iI-r7q"/>
                                         </connections>
                                     </collectionView>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="No Images" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tZS-Tg-Xww">
-                                        <rect key="frame" x="259" y="180" width="83" height="21"/>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="No photos found" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tZS-Tg-Xww">
+                                        <rect key="frame" x="236" y="180" width="129" height="21"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <color key="textColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <nil key="highlightedColor"/>

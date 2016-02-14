@@ -11,7 +11,7 @@ private let SQLITE_FILE_NAME = "MyVirtualTourist.sqlite"
 class CoreDataStackManager {
     
     
-    // MARK: - Shared Instance    
+    // MARK: Shared Instance    
     class func sharedInstance() -> CoreDataStackManager {
         struct Static {
             static let instance = CoreDataStackManager()
@@ -65,7 +65,7 @@ class CoreDataStackManager {
         return managedObjectContext
         }()
     
-    // MARK: - Core Data Saving support
+    // MARK: Core Data Saving support
     
     func saveContext () {
         if managedObjectContext.hasChanges {

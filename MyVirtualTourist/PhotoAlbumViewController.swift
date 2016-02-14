@@ -25,6 +25,8 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     
     let flickr = FlickrClient()
     
+    private let sectionInsets = UIEdgeInsets(top: 5.0, left: 5.0, bottom: 5.0, right: 5.0)
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -56,16 +58,16 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     
     func onNewCollectionButtonTap() {
         if let pin = pin {
-            for photo in pin.pictures {
+            for photo in pin.photos {
                 photo.deletePicture()
             }
             CoreDataStackManager.sharedInstance().saveContext()
         }
         
-        resetPictures()
+        resetPhotos()
     }
     
-    func resetPictures() {
+    func resetPhotos() {
         
         newCollectionButton!.enabled = false
         
@@ -73,7 +75,7 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
             self.flickr.searchPhotosBy2DCoordinates(pin) {
                 success, error, imageMetadata in
                 if success == true {
-                    Picture.initPhotosFrom(imageMetadata, forPin: pin)
+                    Photo.initPhotosFrom(imageMetadata, forPin: pin)
                     
                     self.newCollectionButton!.enabled = true
                     
@@ -138,9 +140,9 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     func configureCell(cell: PictureCell, atIndexPath indexPath: NSIndexPath) {
         
         
-        let picture = self.fetchedResultsController.objectAtIndexPath(indexPath) as! Picture
+        let photo = self.fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
         
-        picture.getImage( { success, error, image in
+        photo.getImage( { success, error, image in
             if success {
                 dispatch_async(dispatch_get_main_queue()) {
                     cell.imageView.image = image
@@ -151,11 +153,25 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
         })
     }
     
+    func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
+        
+        // calculate the cell size
+        //        let nCells = 4
+        //        _ = nCells - 1
+        let widthSpaces: CGFloat = (4 * sectionInsets.left) + (4 * sectionInsets.right)
+        let cellWidth = (collectionView.frame.size.width -  widthSpaces ) / 4
+        return CGSize(width: cellWidth, height: cellWidth)
+    }
+    
+    func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAtIndex section: Int) -> UIEdgeInsets {
+        return sectionInsets
+    }
+    
     // MARK: UICollectionViewDelegate protocol
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
         
-        let picture = self.fetchedResultsController.objectAtIndexPath(indexPath) as! Picture
-        picture.deletePicture()
+        let photo = self.fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
+        photo.deletePicture()
         
         self.collectionView.reloadData()
     }
@@ -168,7 +184,7 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     // MARK: - Fetched results controller
     lazy var fetchedResultsController: NSFetchedResultsController = {
 
-        let fetchRequest = NSFetchRequest(entityName: "Picture")
+        let fetchRequest = NSFetchRequest(entityName: "Photo")
         
         if let pin = self.pin {
             fetchRequest.predicate = NSPredicate(format: "pin == %@", pin)

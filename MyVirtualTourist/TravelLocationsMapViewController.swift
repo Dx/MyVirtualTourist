@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  TravelLocationsMapViewController.swift
 //  MyVirtualTourist
 //
 //  Created by Dx on 06/10/15.
@@ -10,7 +10,7 @@ import UIKit
 import MapKit
 import CoreData
 
-class ViewController: UIViewController, MKMapViewDelegate {
+class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
 
     @IBOutlet weak var mapView: MKMapView!
     @IBOutlet weak var mapContainerView: UIView!
@@ -203,19 +203,24 @@ class ViewController: UIViewController, MKMapViewDelegate {
     }
     
     func fetchAllPins() -> [Pin] {
+        
         let errorPointer: NSErrorPointer = nil
+        
         let fetchRequest = NSFetchRequest(entityName: "Pin")
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "latitude", ascending: false), NSSortDescriptor(key: "longitude", ascending: false)]
         let results: [AnyObject]?
+        
         do {
             results = try sharedContext.executeFetchRequest(fetchRequest)
         } catch let error as NSError {
             errorPointer.memory = error
             results = nil
         }
+        
         if errorPointer != nil {
             print("Error in fetchAllPins(): \(errorPointer)")
         }
+        
         return results as? [Pin] ?? [Pin]()
     }
     
@@ -300,7 +305,7 @@ class ViewController: UIViewController, MKMapViewDelegate {
             self.flickr.searchPhotosBy2DCoordinates(pin) {
                 success, error, imageMetadata in
                 if success == true {
-                    Picture.initPhotosFrom(imageMetadata, forPin: pin)
+                    Photo.initPhotosFrom(imageMetadata, forPin: pin)
                 }
             }
         case .EditPins:

@@ -1,5 +1,5 @@
 //
-//  Picture.swift
+//  Photo.swift
 //  MyVirtualTourist
 //
 //  Created by Dx on 12/10/15.
@@ -10,7 +10,7 @@ import Foundation
 import CoreData
 import UIKit
 
-class Picture : NSManagedObject {
+class Photo : NSManagedObject {
     struct InitKeys {
         static let pin: String = "pin"
         static let url: String = "url"
@@ -34,7 +34,7 @@ class Picture : NSManagedObject {
     
     init(dictionary: [String: AnyObject], context: NSManagedObjectContext) {
         
-        let entity = NSEntityDescription.entityForName("Picture", inManagedObjectContext: context)!
+        let entity = NSEntityDescription.entityForName("Photo", inManagedObjectContext: context)!
         super.init(entity: entity, insertIntoManagedObjectContext: context)
         
         pin = dictionary[InitKeys.pin] as? Pin
@@ -113,8 +113,8 @@ class Picture : NSManagedObject {
             let imageURL = NSURL(string: imageUrlString!)
             if let imageData = NSData(contentsOfURL: imageURL!) {
                 
-                if let picture = UIImage(data: imageData) {
-                    completion(success: true, error: nil, image: picture)
+                if let photo = UIImage(data: imageData) {
+                    completion(success: true, error: nil, image: photo)
                 }
                 else {
                     print("Cannot convert image data.")
@@ -155,37 +155,37 @@ class Picture : NSManagedObject {
         dispatch_async(dispatch_get_main_queue()) {
             
             var dict = [String: AnyObject]()
-            dict[Picture.InitKeys.pin] = forPin
+            dict[Photo.InitKeys.pin] = forPin
             
             if let imageMetadata = imageMetadata {
                 for metadataDictionary in imageMetadata {
 
                     if let url = metadataDictionary[FlickrClient.FlickrImageMetadataKeys.URL] as? String {
-                        dict[Picture.InitKeys.url] = url
+                        dict[Photo.InitKeys.url] = url
                     } else {
-                        dict[Picture.InitKeys.url] = nil
+                        dict[Photo.InitKeys.url] = nil
                     }
                     
                     if let title = metadataDictionary[FlickrClient.FlickrImageMetadataKeys.TITLE] as? String {
-                        dict[Picture.InitKeys.title] = title
+                        dict[Photo.InitKeys.title] = title
                     } else {
-                        dict[Picture.InitKeys.title] = nil
+                        dict[Photo.InitKeys.title] = nil
                     }
                     
                     if let id = metadataDictionary[FlickrClient.FlickrImageMetadataKeys.ID] as? String {
-                        dict[Picture.InitKeys.id] = id
+                        dict[Photo.InitKeys.id] = id
                     } else {
-                        dict[Picture.InitKeys.id] = nil
+                        dict[Photo.InitKeys.id] = nil
                     }
                     
-                    let picture = Picture(dictionary:dict, context: Picture.sharedContext)
+                    let photo = Photo(dictionary:dict, context: Photo.sharedContext)
                     
-                    picture.getImage( { success, error, image in
+                    photo.getImage( { success, error, image in
                         dispatch_async(dispatch_get_main_queue()) {
                             if success {
-                                print("successfully downloaded image \(picture.id): \(picture.title)")
+                                print("successfully downloaded image \(photo.id): \(photo.title)")
                             } else {
-                                print("error acquiring image \(picture.id): \(picture.title)")
+                                print("error getting image \(photo.id): \(photo.title)")
                             }
                         }
                     })
@@ -198,7 +198,7 @@ class Picture : NSManagedObject {
     
     func deletePicture() {
         
-        Picture.sharedContext.deleteObject(self)
+        Photo.sharedContext.deleteObject(self)
         CoreDataStackManager.sharedInstance().saveContext()
     }
 }

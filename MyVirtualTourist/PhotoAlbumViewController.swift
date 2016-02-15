@@ -72,6 +72,7 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     func resetPhotos() {
         
         newCollectionButton!.enabled = false
+        self.startActivityIndicator()
         
         if let pin = self.pin {
             self.flickr.searchPhotosBy2DCoordinates(pin) {
@@ -81,10 +82,14 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
                     
                     self.newCollectionButton!.enabled = true
                     
+                    self.stopActivityIndicator()
+                    
                     dispatch_async(dispatch_get_main_queue()) {
                         self.collectionView.reloadData()
                     }
                 } else {
+                    
+                    self.stopActivityIndicator()
 
                     if let error = error {
                         _ = error.localizedDescription

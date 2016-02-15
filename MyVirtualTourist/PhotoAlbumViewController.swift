@@ -27,6 +27,8 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     
     private let sectionInsets = UIEdgeInsets(top: 5.0, left: 5.0, bottom: 5.0, right: 5.0)
     
+    private var activityIndicator : UIActivityIndicatorView = UIActivityIndicatorView(frame: CGRectMake(0, 0, 40, 40)) as UIActivityIndicatorView
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -59,7 +61,7 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     func onNewCollectionButtonTap() {
         if let pin = pin {
             for photo in pin.photos {
-                photo.deletePicture()
+                photo.deletePhoto()
             }
             CoreDataStackManager.sharedInstance().saveContext()
         }
@@ -155,9 +157,6 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     
     func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAtIndexPath indexPath: NSIndexPath) -> CGSize {
         
-        // calculate the cell size
-        //        let nCells = 4
-        //        _ = nCells - 1
         let widthSpaces: CGFloat = (4 * sectionInsets.left) + (4 * sectionInsets.right)
         let cellWidth = (collectionView.frame.size.width -  widthSpaces ) / 4
         return CGSize(width: cellWidth, height: cellWidth)
@@ -171,9 +170,24 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
         
         let photo = self.fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
-        photo.deletePicture()
+        photo.deletePhoto()
         
         self.collectionView.reloadData()
+    }
+    
+    func startActivityIndicator() {
+        self.activityIndicator.center = self.view.center
+        self.activityIndicator.hidesWhenStopped = true
+        self.activityIndicator.activityIndicatorViewStyle = UIActivityIndicatorViewStyle.WhiteLarge
+        self.view.addSubview(self.activityIndicator)
+        
+        self.activityIndicator.startAnimating()
+    }
+    
+    func stopActivityIndicator() {
+        dispatch_async(dispatch_get_main_queue()) {
+            self.activityIndicator.stopAnimating()
+        }
     }
 
     // MARK: - Core Data

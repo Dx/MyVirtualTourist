@@ -51,7 +51,6 @@ class Pin: NSManagedObject {
         get {
             let annotation = MKPointAnnotation()
             annotation.coordinate = coordinate
-            annotation.title = "select to view photos"
             return annotation
         }
     }

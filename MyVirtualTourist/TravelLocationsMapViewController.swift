@@ -52,6 +52,10 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
         isInitialLoad = false
     }
     
+    override func viewWillAppear(animated: Bool) {
+        self.navigationController?.setToolbarHidden(true, animated: false)
+    }
+    
     func onEditClick() {
         hintContainerView.hidden = false
         
@@ -93,8 +97,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
     // MARK: MapRegion functions
     
     func setMapRegion() {
-        
-        // Get persisted MapRegion instance from Core data (if any exists) and save it to both the view controller's private mapRegion property, and the mapView's region.
+
         let regions = fetchMapRegions()
         if regions.count > 0 {
             // Use the persisted value for the region.
@@ -181,7 +184,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
     
     func setPinsOnMap() {
         // clear all pins from the mapView
-        let annotations = mapView.annotations //add this if you want to leave the pin of the user's current location .filter { $0 !== mapView.userLocation }
+        let annotations = mapView.annotations
         mapView.removeAnnotations(annotations)
         
         // query the context for all pins
@@ -244,7 +247,6 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
             results = nil
         }
         
-        // Check for Errors
         if let error = error {
             print("Unresolved error \(error), \(error.userInfo)", terminator: "")
             abort()
@@ -321,7 +323,6 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
         
         showPinOnMap(pin)
         
-        // Save pin
         CoreDataStackManager.sharedInstance().saveContext()
         
         return pin

@@ -196,7 +196,7 @@ class Photo : NSManagedObject {
         }
     }
     
-    func deletePicture() {
+    func deletePhoto() {
         
         Photo.sharedContext.deleteObject(self)
         CoreDataStackManager.sharedInstance().saveContext()

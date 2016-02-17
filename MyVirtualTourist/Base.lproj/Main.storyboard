@@ -2,6 +2,7 @@
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9532" systemVersion="15D21" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="rS3-R9-Ivy">
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9530"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
         <!--Master-->
@@ -226,6 +227,40 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="q6A-Dp-iTd" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1343" y="64"/>
+        </scene>
+        <!--DetailViewController-->
+        <scene sceneID="9B3-Bx-zmt">
+            <objects>
+                <viewController storyboardIdentifier="DetailViewController" title="DetailViewController" id="SrQ-IP-kov" customClass="DetailViewController" customModule="MyVirtualTourist" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="4Bm-qq-jGs"/>
+                        <viewControllerLayoutGuide type="bottom" id="vAd-p4-b61"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="oJ9-ON-72t">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" restorationIdentifier="photo" translatesAutoresizingMaskIntoConstraints="NO" id="THB-GY-gbL">
+                                <rect key="frame" x="180" y="115" width="240" height="250"/>
+                            </imageView>
+                        </subviews>
+                        <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="vAd-p4-b61" firstAttribute="top" secondItem="THB-GY-gbL" secondAttribute="bottom" constant="30" id="029-n3-gc5"/>
+                            <constraint firstItem="THB-GY-gbL" firstAttribute="leading" secondItem="oJ9-ON-72t" secondAttribute="leadingMargin" constant="160" id="aZb-9b-rme"/>
+                            <constraint firstItem="THB-GY-gbL" firstAttribute="leading" secondItem="oJ9-ON-72t" secondAttribute="leadingMargin" constant="30" id="dKm-U2-NmS"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="THB-GY-gbL" secondAttribute="trailing" constant="160" id="jBp-fg-U1n"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="THB-GY-gbL" secondAttribute="trailing" constant="30" id="kJC-oO-V5I"/>
+                            <constraint firstItem="THB-GY-gbL" firstAttribute="top" secondItem="4Bm-qq-jGs" secondAttribute="bottom" constant="30" id="z01-og-mP4"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="photo" destination="THB-GY-gbL" id="v4g-OB-03l"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="9yW-9b-b4O" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2073" y="69"/>
         </scene>
     </scenes>
 </document>

@@ -60,7 +60,7 @@ class Photo : NSManagedObject {
                     if let theImage = theImage {
                         self.cacheImageAndWriteToFile(theImage)
                     }
-                    print("image downloaded")
+
                     completion(success: true, error: nil, image: theImage)
                     return
                 } else {
@@ -69,7 +69,7 @@ class Photo : NSManagedObject {
                             if let theImage = theImage {
                                 self.cacheImageAndWriteToFile(theImage)
                             }
-                            print("image downloaded")
+
                             completion(success: true, error: nil, image: theImage)
                             return
                         } else {
@@ -183,7 +183,7 @@ class Photo : NSManagedObject {
                     photo.getImage( { success, error, image in
                         dispatch_async(dispatch_get_main_queue()) {
                             if success {
-                                print("successfully downloaded image \(photo.id): \(photo.title)")
+                                print("image downloaded \(photo.id): \(photo.title)")
                             } else {
                                 print("error getting image \(photo.id): \(photo.title)")
                             }
@@ -197,8 +197,34 @@ class Photo : NSManagedObject {
     }
     
     func deletePhoto() {
-        
+
+        deleteFileFromFileSystem()
         Photo.sharedContext.deleteObject(self)
         CoreDataStackManager.sharedInstance().saveContext()
+    }
+    
+    func deleteFileFromFileSystem() {
+        if let id = self.id {
+            
+            let path = pathForImageFileWith(id)
+            
+            if let path = path {
+                if NSFileManager.defaultManager().fileExistsAtPath(path) {
+                    let error:NSErrorPointer = NSErrorPointer()
+                    
+                    do {
+                        try NSFileManager.defaultManager().removeItemAtPath(path)
+                    } catch let error1 as NSError {
+                        error.memory = error1
+                    }
+                    
+                    print("deleted file \(path)")
+
+                    if error != nil {
+                        print(error.debugDescription)
+                    }
+                }
+            }
+        }
     }
 }

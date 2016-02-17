@@ -11,7 +11,7 @@ import UIKit
 import CoreData
 import MapKit
 
-class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, NSFetchedResultsControllerDelegate, flickrDelegate {
+class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UICollectionViewDelegate, UICollectionViewDelegateFlowLayout, NSFetchedResultsControllerDelegate, flickrDelegate, UIViewControllerPreviewingDelegate {
     
     @IBOutlet weak var mapView: MKMapView!
     
@@ -29,8 +29,18 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     
     private var activityIndicator : UIActivityIndicatorView = UIActivityIndicatorView(frame: CGRectMake(0, 0, 40, 40)) as UIActivityIndicatorView
     
+    var selectedIndexes = [NSIndexPath]()
+    
+    var insertedIndexPaths: [NSIndexPath]!
+    var deletedIndexPaths: [NSIndexPath]!
+    var updatedIndexPaths: [NSIndexPath]!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        if( traitCollection.forceTouchCapability == .Available){
+            registerForPreviewingWithDelegate(self, sourceView: view)
+        }
         
         fetchPhotos()
         
@@ -67,6 +77,41 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
         }
         
         resetPhotos()
+    }
+    
+    // MARK: - UIViewControllerPreviewing Delegate
+    
+    func previewingContext(previewingContext: UIViewControllerPreviewing, viewControllerForLocation location: CGPoint) -> UIViewController? {
+        
+        guard let indexPath = collectionView?.indexPathForItemAtPoint(location) else { return nil }
+        
+        guard let cell = collectionView?.cellForItemAtIndexPath(indexPath) else { return nil }
+        
+        guard let detailVC = storyboard?.instantiateViewControllerWithIdentifier("DetailViewController") as? DetailViewController else { return nil }
+        
+        let photo = self.fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
+        
+        photo.getImage( { success, error, image in
+            if success {
+                dispatch_async(dispatch_get_main_queue()) {
+                    detailVC.photo.image = image
+                }
+            } else {
+                detailVC.photo = nil
+            }
+        })
+        
+        detailVC.preferredContentSize = CGSize(width: 0.0, height: 300)
+        
+        previewingContext.sourceRect = cell.frame
+        
+        return detailVC
+    }
+    
+    func previewingContext(previewingContext: UIViewControllerPreviewing, commitViewController viewControllerToCommit: UIViewController) {
+        
+        showViewController(viewControllerToCommit, sender: self)
+        
     }
     
     func resetPhotos() {
@@ -144,10 +189,11 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
         return cell
     }
     
-    func configureCell(cell: PictureCell, atIndexPath indexPath: NSIndexPath) {
-        
+    func configureCell(cell: PictureCell, atIndexPath indexPath: NSIndexPath) {        
         
         let photo = self.fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
+        
+        cell.imageView.image = UIImage(named: "placeholder.jpg")
         
         photo.getImage( { success, error, image in
             if success {
@@ -232,9 +278,55 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
             print("Error \(error), \(error.userInfo)")
         }
     }
+    
+    func controllerWillChangeContent(controller: NSFetchedResultsController) {
+        insertedIndexPaths = [NSIndexPath]()
+        deletedIndexPaths = [NSIndexPath]()
+        updatedIndexPaths = [NSIndexPath]()
+    }
+    
+    func controller(controller: NSFetchedResultsController, didChangeSection sectionInfo: NSFetchedResultsSectionInfo, atIndex sectionIndex: Int, forChangeType type: NSFetchedResultsChangeType) {
+    }
+    
+    func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
+        
+        switch type{
+            
+        case .Insert:
+            insertedIndexPaths.append(newIndexPath!)
+            break
+        case .Delete:
+            deletedIndexPaths.append(indexPath!)
+            break
+        case .Update:
+            updatedIndexPaths.append(indexPath!)
+            break
+        case .Move:
+            break
+        }
+    }
+    
+    func controllerDidChangeContent(controller: NSFetchedResultsController) {
+        
+        collectionView.performBatchUpdates({() -> Void in
+            
+            for indexPath in self.insertedIndexPaths {
+                self.collectionView.insertItemsAtIndexPaths([indexPath])
+            }
+            
+            for indexPath in self.deletedIndexPaths {
+                self.collectionView.deleteItemsAtIndexPaths([indexPath])
+            }
+            
+            for indexPath in self.updatedIndexPaths {
+                self.collectionView.reloadItemsAtIndexPaths([indexPath])
+            }
+            
+            }, completion: nil)
+    }
 
     // MARK: - Flickr Client delegate
     func numberOfPhotosToReturn(flickr: FlickrClient, count: Int) {
         print("flickrDelegate protocol reports \(count) images will be downloaded.")
-    }
+    }    
 }

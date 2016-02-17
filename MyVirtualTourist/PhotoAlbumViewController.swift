@@ -83,7 +83,11 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     
     func previewingContext(previewingContext: UIViewControllerPreviewing, viewControllerForLocation location: CGPoint) -> UIViewController? {
         
-        guard let indexPath = collectionView?.indexPathForItemAtPoint(location) else { return nil }
+        var newLocation = location
+        
+        newLocation.y -= 191
+        
+        guard let indexPath = collectionView?.indexPathForItemAtPoint(newLocation) else { return nil }
         
         guard let cell = collectionView?.cellForItemAtIndexPath(indexPath) else { return nil }
         
@@ -111,7 +115,6 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     func previewingContext(previewingContext: UIViewControllerPreviewing, commitViewController viewControllerToCommit: UIViewController) {
         
         showViewController(viewControllerToCommit, sender: self)
-        
     }
     
     func resetPhotos() {

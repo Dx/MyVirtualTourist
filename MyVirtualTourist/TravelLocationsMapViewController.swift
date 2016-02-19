@@ -106,12 +106,9 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
 
         let regions = fetchMapRegions()
         if regions.count > 0 {
-            // Use the persisted value for the region.
             
-            // set the view controller's mapRegion property
             self.mapRegion = regions[0]
             
-            // Set the mapView's region.
             self.mapView.region = regions[0].region
         }
     }
@@ -265,7 +262,6 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
     }
     
     func fetchPin(atCoordinate coordinate: CLLocationCoordinate2D) -> Pin? {
-        // Create and execute the fetch request
         let error: NSErrorPointer = nil
         let fetchRequest = NSFetchRequest(entityName: "Pin")
         fetchRequest.sortDescriptors = [NSSortDescriptor(key: "latitude", ascending: false), NSSortDescriptor(key: "longitude", ascending: false)]

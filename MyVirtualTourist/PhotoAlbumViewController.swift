@@ -23,56 +23,65 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     
     var pin:Pin?
     
+    var selectedIndexes = [NSIndexPath]()
+    var insertedIndexPaths: [NSIndexPath]!
+    var deletedIndexPaths: [NSIndexPath]!
+    var updatedIndexPaths: [NSIndexPath]!
+    
     let flickr = FlickrClient()
     
     private let sectionInsets = UIEdgeInsets(top: 5.0, left: 5.0, bottom: 5.0, right: 5.0)
     
     private var activityIndicator : UIActivityIndicatorView = UIActivityIndicatorView(frame: CGRectMake(0, 0, 40, 40)) as UIActivityIndicatorView
     
-    var selectedIndexes = [NSIndexPath]()
-    
-    var insertedIndexPaths: [NSIndexPath]!
-    var deletedIndexPaths: [NSIndexPath]!
-    var updatedIndexPaths: [NSIndexPath]!
+    // MARK: - View Controller
     
     override func viewDidLoad() {
+        
         super.viewDidLoad()
+
+        settingDelegates()
         
-        if( traitCollection.forceTouchCapability == .Available){
-            registerForPreviewingWithDelegate(self, sourceView: view)
-        }
-        
-        self.collectionView.dataSource = self
-        self.collectionView.delegate = self
-        
-        // Setting delegates
-        flickr.delegate = self
-        fetchedResultsController.delegate = self
+        settingButtons()
         
         if let pin = pin {
             showPinOnMap(pin)
+            newCollectionButton!.enabled = true
         }
+    }
+    
+    override func viewWillAppear(animated: Bool) {
         
-        // configure the toolbar items
+        self.startActivityIndicator()
+        fetchPhotos()
+        self.stopActivityIndicator()
+    }
+    
+    func settingButtons() {
+        
         let flexButtonLeft = UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil)
         newCollectionButton = UIBarButtonItem(title: "New Collection", style: .Plain, target: self, action: "onNewCollectionButtonTap")
         let flexButtonRight = UIBarButtonItem(barButtonSystemItem: .FlexibleSpace, target: nil, action: nil)
         self.setToolbarItems([flexButtonLeft, newCollectionButton!, flexButtonRight], animated: true)
         
         self.navigationController?.setToolbarHidden(false, animated: true)
+    }
+    
+    func settingDelegates() {
         
-        if let _ = pin {
-            newCollectionButton!.enabled = true
+        self.collectionView.dataSource = self
+        self.collectionView.delegate = self
+        
+        flickr.delegate = self
+        fetchedResultsController.delegate = self
+        
+        if( traitCollection.forceTouchCapability == .Available){
+            registerForPreviewingWithDelegate(self, sourceView: view)
         }
     }
     
-    override func viewWillAppear(animated: Bool) {
-        self.startActivityIndicator()
-        fetchPhotos()
-        self.stopActivityIndicator()
-    }
-    
     func onNewCollectionButtonTap() {
+        
         if let pin = pin {
             for photo in pin.photos {
                 photo.deletePhoto()
@@ -81,6 +90,52 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
         }
         
         resetPhotos()
+    }
+    
+    func resetPhotos() {
+        
+        newCollectionButton!.enabled = false
+        self.startActivityIndicator()
+        
+        if let pin = self.pin {
+            self.flickr.searchPhotosBy2DCoordinates(pin) {
+                success, error, imageMetadata in
+                if success == true {
+                    Photo.initPhotosFrom(imageMetadata, forPin: pin)
+                    
+                    self.newCollectionButton!.enabled = true
+                    
+                    self.stopActivityIndicator()
+                    
+                    dispatch_async(dispatch_get_main_queue()) {
+                        self.collectionView.reloadData()
+                    }
+                } else {
+                    
+                    self.stopActivityIndicator()
+                    
+                    if let error = error {
+                        _ = error.localizedDescription
+                        print("error \(error.localizedDescription)")
+                    }
+                }
+            }
+        }
+    }
+    
+    func showPinOnMap(pin: Pin) {
+        
+        var annotations = [MKPointAnnotation]()
+        annotations.append(pin.annotation)
+        
+        self.mapView.addAnnotations(annotations)
+        
+        let span = MKCoordinateSpanMake(0.15, 0.15)
+        self.mapView.region.span = span
+        
+        self.mapView.setCenterCoordinate(pin.coordinate, animated: false)
+        
+        self.mapView.setNeedsDisplay()
     }
     
     // MARK: - UIViewControllerPreviewing Delegate
@@ -121,53 +176,10 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
         showViewController(viewControllerToCommit, sender: self)
     }
     
-    func resetPhotos() {
-        
-        newCollectionButton!.enabled = false
-        self.startActivityIndicator()
-        
-        if let pin = self.pin {
-            self.flickr.searchPhotosBy2DCoordinates(pin) {
-                success, error, imageMetadata in
-                if success == true {
-                    Photo.initPhotosFrom(imageMetadata, forPin: pin)
-                    
-                    self.newCollectionButton!.enabled = true
-                    
-                    self.stopActivityIndicator()
-                    
-                    dispatch_async(dispatch_get_main_queue()) {
-                        self.collectionView.reloadData()
-                    }
-                } else {
-                    
-                    self.stopActivityIndicator()
-
-                    if let error = error {
-                        _ = error.localizedDescription
-                        print("error \(error.localizedDescription)")
-                    }
-                }
-            }
-        }
-    }
+    // MARK: - UICollectionViewDataSource protocol
     
-    func showPinOnMap(pin: Pin) {
-        var annotations = [MKPointAnnotation]()
-        annotations.append(pin.annotation)
-        
-        self.mapView.addAnnotations(annotations)
-        
-        let span = MKCoordinateSpanMake(0.15, 0.15)
-        self.mapView.region.span = span
-        
-        self.mapView.setCenterCoordinate(pin.coordinate, animated: false)
-        
-        self.mapView.setNeedsDisplay()
-    }
-    
-    // MARK: UICollectionViewDataSource protocol
     func numberOfSectionsInCollectionView(collectionView: UICollectionView) -> Int {
+        
         return self.fetchedResultsController.sections?.count ?? 0
     }
     
@@ -221,10 +233,11 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     }
     
     func collectionView(collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAtIndex section: Int) -> UIEdgeInsets {
+        
         return sectionInsets
     }
     
-    // MARK: UICollectionViewDelegate protocol
+    // MARK: - UICollectionViewDelegate protocol
     func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
         
         let photo = self.fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
@@ -300,17 +313,17 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
         
         switch type{
             
-        case .Insert:
-            insertedIndexPaths.append(newIndexPath!)
-            break
-        case .Delete:
-            deletedIndexPaths.append(indexPath!)
-            break
-        case .Update:
-            updatedIndexPaths.append(indexPath!)
-            break
-        case .Move:
-            break
+            case .Insert:
+                insertedIndexPaths.append(newIndexPath!)
+                break
+            case .Delete:
+                deletedIndexPaths.append(indexPath!)
+                break
+            case .Update:
+                updatedIndexPaths.append(indexPath!)
+                break
+            case .Move:
+                break
         }
     }
     

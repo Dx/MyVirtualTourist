@@ -26,10 +26,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
         case EditPins
     }
     
-    // MARK: - Shared Context
-    lazy var sharedContext: NSManagedObjectContext = {
-        CoreDataStackManager.sharedInstance().managedObjectContext
-    }()
+    // MARK: - View Controller
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -40,20 +37,23 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
         
         let editButton = UIBarButtonItem(barButtonSystemItem: .Edit, target: self, action: "onEditClick")
         self.navigationItem.rightBarButtonItem = editButton
-
-        let longPressRecogniser = UILongPressGestureRecognizer(target: self, action: "longPress:")
-        longPressRecogniser.minimumPressDuration = 1.0
-        mapView.addGestureRecognizer(longPressRecogniser)
-        
-        setMapRegion()
-        
-        setPinsOnMap()
         
         isInitialLoad = false
     }
     
     override func viewWillAppear(animated: Bool) {
         self.navigationController?.setToolbarHidden(true, animated: false)
+        
+        addLongPressGesture()
+        
+        setMapRegion()
+        setPinsOnMap()
+    }
+    
+    func addLongPressGesture() {
+        let longPressRecogniser = UILongPressGestureRecognizer(target: self, action: "longPress:")
+        longPressRecogniser.minimumPressDuration = 1.0
+        mapView.addGestureRecognizer(longPressRecogniser)
     }
     
     func onEditClick() {
@@ -76,7 +76,7 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
     func onDoneClick() {
         // Animate
         UIView.animateWithDuration(0.5, animations: {
-
+            
             self.mapContainerView.frame = CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y + 64, self.view.frame.size.width, self.view.frame.size.height - 64)
             
             self.mapView.frame = CGRectMake(self.view.frame.origin.x, self.view.frame.origin.y - 64, self.view.frame.size.width, self.view.frame.size.height)
@@ -94,7 +94,13 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
         currentState = .AddPin
     }
     
-    // MARK: MapRegion functions
+    // MARK: - Shared Context
+    
+    lazy var sharedContext: NSManagedObjectContext = {
+        CoreDataStackManager.sharedInstance().managedObjectContext
+    }()
+    
+    // MARK: - MapRegion functions
     
     func setMapRegion() {
 
@@ -158,48 +164,47 @@ class TravelLocationsMapViewController: UIViewController, MKMapViewDelegate {
         
         return results as? [MapRegion] ?? [MapRegion]()
     }
-    
+
     // MARK: - Pins
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
         
+        selectPin(mapView, view: view)
+    }
+    
+    func selectPin(mapView: MKMapView, view: MKAnnotationView) {
         let annotation: MKAnnotation = view.annotation!
         
         let pin: Pin? = fetchPin(atCoordinate: annotation.coordinate)
         
         switch currentState {
-            case .AddPin:
-                let storyboard = UIStoryboard (name: "Main", bundle: nil)
-                let controller = storyboard.instantiateViewControllerWithIdentifier("PhotoAlbumControllerID") as! PhotoAlbumViewController
-                controller.pin = pin
-                self.navigationController?.pushViewController(controller, animated: true)
+        case .AddPin:
+            let storyboard = UIStoryboard (name: "Main", bundle: nil)
+            let controller = storyboard.instantiateViewControllerWithIdentifier("PhotoAlbumControllerID") as! PhotoAlbumViewController
+            controller.pin = pin
+            self.navigationController?.pushViewController(controller, animated: true)
             
-            case .EditPins:
-                if let pin = pin {
-                    deletePin(pin)
-                }
+        case .EditPins:
+            if let pin = pin {
+                deletePin(pin)
+            }
             
-                mapView.removeAnnotation(annotation)
+            mapView.removeAnnotation(annotation)
         }
     }
     
     func setPinsOnMap() {
-        // clear all pins from the mapView
         let annotations = mapView.annotations
         mapView.removeAnnotations(annotations)
         
-        // query the context for all pins
         let pins = fetchAllPins()
         
         var annotationsToAdd = [MKAnnotation]()
         for pin in pins {
             annotationsToAdd.append(pin.annotation)
-            //showPinOnMap(pin)
         }
         
-        // add all the pins to the mapView
         mapView.addAnnotations(annotationsToAdd)
         
-        // draw the pins
         dispatch_async(dispatch_get_main_queue()) {
             self.mapView.setNeedsDisplay()
         }

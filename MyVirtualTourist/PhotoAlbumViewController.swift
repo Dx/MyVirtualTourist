@@ -42,8 +42,6 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
             registerForPreviewingWithDelegate(self, sourceView: view)
         }
         
-        fetchPhotos()
-        
         self.collectionView.dataSource = self
         self.collectionView.delegate = self
         
@@ -66,6 +64,12 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
         if let _ = pin {
             newCollectionButton!.enabled = true
         }
+    }
+    
+    override func viewWillAppear(animated: Bool) {
+        self.startActivityIndicator()
+        fetchPhotos()
+        self.stopActivityIndicator()
     }
     
     func onNewCollectionButtonTap() {
@@ -196,7 +200,7 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
         
         let photo = self.fetchedResultsController.objectAtIndexPath(indexPath) as! Photo
         
-        cell.imageView.image = UIImage(named: "placeholder.jpg")
+        cell.imageView.image = UIImage(named: "EmptyPhoto.png")
         
         photo.getImage( { success, error, image in
             if success {
@@ -230,10 +234,11 @@ class PhotoAlbumViewController: UIViewController, UICollectionViewDataSource, UI
     }
     
     func startActivityIndicator() {
+        
         self.activityIndicator.center = self.view.center
         self.activityIndicator.hidesWhenStopped = true
         self.activityIndicator.activityIndicatorViewStyle = UIActivityIndicatorViewStyle.WhiteLarge
-        self.view.addSubview(self.activityIndicator)
+        self.collectionView.addSubview(self.activityIndicator)
         
         self.activityIndicator.startAnimating()
     }
